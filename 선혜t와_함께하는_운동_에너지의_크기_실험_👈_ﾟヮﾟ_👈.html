@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>운동 에너지의 크기</title>
+  <style>
+    :root{
+      --bg:#fdecef;
+      --card:#fff8fa;
+      --card2:#fffdfd;
+      --head:#f8dbe3;
+      --line:#f1c7d3;
+      --line2:#f4d7df;
+      --pink:#e98aa6;
+      --pink-dark:#9d4260;
+      --pink-soft:#fff1f5;
+      --text:#4b2d36;
+      --muted:#8a6872;
+      --rail:#37424c;
+      --wood:#9a6338;
+      --shadow:0 10px 24px rgba(170,80,115,.12);
+    }
+
+    *{box-sizing:border-box;}
+
+    body{
+      margin:0;
+      font-family:"Pretendard","Noto Sans KR",system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    .app{
+      width:min(1240px,96vw);
+      margin:18px auto 40px;
+    }
+
+    .title{
+      background:linear-gradient(135deg,#fff8fa,#ffe6ee);
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:18px 22px;
+      box-shadow:var(--shadow);
+      margin-bottom:16px;
+    }
+
+    .title h1{
+      margin:0 0 6px;
+      font-size:clamp(1.45rem,2.5vw,2.15rem);
+      letter-spacing:-.04em;
+      color:var(--pink-dark);
+    }
+
+    .title p{
+      margin:0;
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    .top-layout{
+      display:grid;
+      grid-template-columns:1.08fr .92fr;
+      gap:14px;
+      margin-bottom:14px;
+    }
+
+    .right-stack{display:grid;gap:14px;}
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:20px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .card-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      background:var(--head);
+      color:var(--pink-dark);
+      font-weight:900;
+      padding:12px 16px;
+      border-bottom:1px solid var(--line);
+    }
+
+    .pill{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:5px 10px;
+      font-size:.8rem;
+      color:var(--pink-dark);
+      font-weight:900;
+    }
+
+    .card-body{padding:14px;}
+
+    .sim-stage{
+      position:relative;
+      height:420px;
+      background:linear-gradient(180deg,#fffdfd 0%,#fff4f7 100%);
+      border:1px solid var(--line2);
+      border-radius:16px;
+      overflow:hidden;
+    }
+
+    /* 실험 장치 */
+    .ground{
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:0;
+      height:100px;
+      background:#f2ddb5;
+      border-top:1px solid #e4c98f;
+    }
+
+    .ground::before,
+    .ground::after{
+      content:"";
+      position:absolute;
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:#d8bd82;
+      opacity:.55;
+    }
+    .ground::before{left:90px;top:35px;}
+    .ground::after{right:135px;top:54px;}
+
+    .stand{
+      position:absolute;
+      left:78px;
+      bottom:100px;
+      width:26px;
+      height:255px;
+      background:#8ba1ad;
+      border-radius:8px 8px 0 0;
+      box-shadow:inset -5px 0 0 rgba(0,0,0,.09);
+    }
+
+    .scale-line{
+      position:absolute;
+      left:34px;
+      bottom:112px;
+      width:52px;
+      height:238px;
+      border-left:3px solid #3985c6;
+    }
+
+    .scale-line span{
+      position:absolute;
+      left:0;
+      width:28px;
+      height:2px;
+      background:#3985c6;
+    }
+
+    .scale-line span::after{
+      content:attr(data-label);
+      position:absolute;
+      left:34px;
+      top:-7px;
+      font-size:.68rem;
+      color:#2a5f8f;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .slope{
+      position:absolute;
+      left:95px;
+      top:125px;
+      width:330px;
+      height:18px;
+      background:var(--rail);
+      border-radius:999px;
+      transform:rotate(12deg);
+      transform-origin:left center;
+      box-shadow:0 9px 14px rgba(0,0,0,.16);
+      z-index:2;
+    }
+
+    .slope::before,
+    .slope::after,
+    .track::before,
+    .track::after{
+      content:"";
+      position:absolute;
+      left:10px;
+      right:10px;
+      height:2px;
+      background:rgba(255,255,255,.32);
+      border-radius:999px;
+    }
+    .slope::before,.track::before{top:5px;}
+    .slope::after,.track::after{bottom:5px;}
+
+    .track{
+      position:absolute;
+      left:405px;
+      right:42px;
+      top:193px;
+      height:18px;
+      background:var(--rail);
+      border-radius:999px;
+      box-shadow:0 9px 14px rgba(0,0,0,.16);
+      z-index:2;
+    }
+
+    .gate{
+      position:absolute;
+      left:360px;
+      top:164px;
+      width:54px;
+      height:66px;
+      border:5px solid #738c9b;
+      border-bottom:0;
+      border-radius:14px 14px 4px 4px;
+      z-index:3;
+    }
+
+    .gate::after{
+      content:"속력 측정기";
+      position:absolute;
+      top:-26px;
+      left:-10px;
+      font-size:.72rem;
+      font-weight:900;
+      color:#6a7f8b;
+      background:#fff;
+      border:1px solid #d9e7ee;
+      border-radius:999px;
+      padding:2px 7px;
+      white-space:nowrap;
+    }
+
+    .ball{
+      position:absolute;
+      left:110px;
+      top:94px;
+      width:34px;
+      height:34px;
+      border-radius:50%;
+      background:radial-gradient(circle at 30% 28%,#fff 0 12%,#d7dce0 24%,#8b969e 52%,#4f5961 100%);
+      box-shadow:0 8px 14px rgba(0,0,0,.25);
+      z-index:6;
+      display:grid;
+      place-items:center;
+      color:white;
+      font-size:.62rem;
+      font-weight:900;
+      text-shadow:0 1px 2px rgba(0,0,0,.4);
+      transform:translate(0,0) rotate(0deg);
+    }
+
+    .block{
+      position:absolute;
+      left:485px;
+      top:169px;
+      width:82px;
+      height:48px;
+      border-radius:8px;
+      background:linear-gradient(135deg,#c98d56,#8d572d);
+      border:2px solid #74441e;
+      box-shadow:0 8px 13px rgba(0,0,0,.2);
+      z-index:4;
+    }
+
+    .block::before{
+      content:"";
+      position:absolute;
+      inset:8px 10px;
+      border-top:2px solid rgba(255,255,255,.25);
+      border-bottom:2px solid rgba(0,0,0,.13);
+    }
+
+    .distance-arrow{
+      position:absolute;
+      left:485px;
+      top:250px;
+      width:0;
+      border-top:4px solid #e58f37;
+      opacity:0;
+      z-index:5;
+      transition:width .55s ease,opacity .2s ease;
+    }
+
+    .distance-arrow::after{
+      content:"";
+      position:absolute;
+      right:-2px;
+      top:-10px;
+      border-left:14px solid #e58f37;
+      border-top:8px solid transparent;
+      border-bottom:8px solid transparent;
+    }
+
+    .distance-label{
+      position:absolute;
+      left:485px;
+      top:266px;
+      opacity:0;
+      background:#fff6dd;
+      border:1px solid #f3c875;
+      color:#946000;
+      font-weight:900;
+      border-radius:999px;
+      padding:4px 9px;
+      font-size:.82rem;
+      z-index:5;
+    }
+
+    .mode-tabs{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      margin-bottom:12px;
+    }
+
+    .tab{
+      border:1px solid var(--line);
+      background:#f6e5ea;
+      color:var(--pink-dark);
+      border-radius:12px;
+      padding:11px 8px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .tab.active{
+      background:var(--pink);
+      color:#fff;
+      border-color:var(--pink);
+    }
+
+    .desc{
+      background:var(--pink-soft);
+      border:1px solid var(--line2);
+      border-radius:13px;
+      padding:11px;
+      color:#79535f;
+      font-size:.93rem;
+      font-weight:700;
+      margin-bottom:12px;
+    }
+
+    .controls{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-bottom:12px;
+    }
+
+    .control label{
+      display:block;
+      margin-bottom:6px;
+      color:var(--pink-dark);
+      font-size:.9rem;
+      font-weight:900;
+    }
+
+    select{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:#fff;
+      color:var(--text);
+      padding:10px 11px;
+      font-family:inherit;
+      font-weight:800;
+    }
+
+    select:disabled{
+      background:#f5edf0;
+      color:#9d8790;
+    }
+
+    .btn-row{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:8px;
+    }
+
+    button{
+      font-family:inherit;
+      border:0;
+      border-radius:12px;
+      padding:11px 10px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .start{background:var(--pink);color:#fff;}
+    .save{background:#f6d8df;color:var(--pink-dark);}
+    .reset{background:#fff0f3;color:#c05a78;border:1px solid #f1c3cf;}
+
+    .hint{
+      margin-top:9px;
+      color:var(--muted);
+      font-size:.78rem;
+      font-weight:700;
+    }
+
+    .summary{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:8px;
+      margin-bottom:10px;
+    }
+
+    .summary-box{
+      background:#fff3f6;
+      border:1px solid var(--line2);
+      border-radius:14px;
+      padding:12px;
+      text-align:center;
+    }
+
+    .summary-box small{
+      display:block;
+      color:#9c6b79;
+      font-weight:900;
+      margin-bottom:4px;
+    }
+
+    .summary-box strong{
+      color:var(--pink-dark);
+      font-size:1.08rem;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      overflow:hidden;
+      border-radius:13px;
+      font-size:.86rem;
+    }
+
+    th,td{
+      border:1px solid #f0d5dc;
+      padding:8px 6px;
+      text-align:center;
+    }
+
+    th{
+      background:#fbe7ec;
+      color:var(--pink-dark);
+      font-weight:900;
+    }
+
+    .empty{color:var(--muted);font-weight:700;}
+
+    .graph-layout{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+
+    canvas{
+      width:100%;
+      height:250px;
+      display:block;
+      background:#fffdfd;
+      border:1px solid var(--line2);
+      border-radius:14px;
+    }
+
+    @media(max-width:980px){
+      .top-layout,.graph-layout{grid-template-columns:1fr;}
+      .sim-stage{height:390px;}
+    }
+
+    @media(max-width:620px){
+      .app{width:96vw;margin-top:10px;}
+      .controls,.summary,.btn-row{grid-template-columns:1fr;}
+      .sim-stage{height:330px;}
+      .stand{left:45px;bottom:78px;height:205px;width:22px;}
+      .scale-line{left:18px;bottom:88px;height:190px;}
+      .scale-line span::after{font-size:.58rem;left:28px;}
+      .slope{left:65px;top:118px;width:230px;transform:rotate(15deg);}
+      .track{left:284px;right:20px;top:178px;}
+      .gate{left:252px;top:151px;width:46px;height:58px;}
+      .gate::after{font-size:.62rem;left:-12px;}
+      .ball{left:76px;top:91px;width:30px;height:30px;}
+      .block{left:345px;top:154px;width:64px;height:40px;}
+      .distance-arrow{left:345px;top:225px;}
+      .distance-label{left:345px;top:240px;font-size:.72rem;}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="title">
+      <h1>운동 에너지의 크기</h1>
+      <p>빗면에서 굴러 내려온 쇠구슬이 나무 도막을 미는 거리를 비교해 봅시다.</p>
+    </section>
+
+    <div class="top-layout">
+      <section class="card">
+        <div class="card-header">
+          <span>① 가상 실험 장치</span>
+          <span class="pill">빗면에서 굴러 내려오는 쇠구슬</span>
+        </div>
+        <div class="card-body">
+          <div class="sim-stage">
+            <div class="scale-line" aria-hidden="true">
+              <span style="top:0%" data-label="100 cm"></span>
+              <span style="top:20%" data-label="80 cm"></span>
+              <span style="top:40%" data-label="60 cm"></span>
+              <span style="top:60%" data-label="40 cm"></span>
+              <span style="top:80%" data-label="20 cm"></span>
+              <span style="top:100%" data-label="0 cm"></span>
+            </div>
+            <div class="stand"></div>
+            <div class="slope"></div>
+            <div class="track"></div>
+            <div class="gate"></div>
+            <div class="ball" id="ball">0.10</div>
+            <div class="block" id="block"></div>
+            <div class="distance-arrow" id="distanceArrow"></div>
+            <div class="distance-label" id="distanceLabel">0.0 cm</div>
+            <div class="ground"></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="right-stack">
+        <section class="card">
+          <div class="card-header">
+            <span>② 실험 조건 선택</span>
+            
+          </div>
+          <div class="card-body">
+            <div class="mode-tabs">
+              <button class="tab active" id="massTab">실험 1 : 질량 변화</button>
+              <button class="tab" id="speedTab">실험 2 : 속력 변화</button>
+            </div>
+            <div class="desc" id="descBox">실험 1은 속력을 일정하게 하고, 쇠구슬의 질량에 따라 나무 도막의 이동 거리를 비교합니다.</div>
+
+            <div class="controls">
+              <div class="control">
+                <label for="massSelect">쇠구슬 질량</label>
+                <select id="massSelect">
+                  <option value="0.02">0.02 kg</option>
+                  <option value="0.04">0.04 kg</option>
+                  <option value="0.06">0.06 kg</option>
+                  <option value="0.08">0.08 kg</option>
+                  <option value="0.10" selected>0.10 kg</option>
+                  <option value="0.12">0.12 kg</option>
+                  <option value="0.14">0.14 kg</option>
+                  <option value="0.16">0.16 kg</option>
+                  <option value="0.18">0.18 kg</option>
+                  <option value="0.20">0.20 kg</option>
+                  <option value="0.25">0.25 kg</option>
+                  <option value="0.30">0.30 kg</option>
+                </select>
+              </div>
+              <div class="control">
+                <label for="speedSelect">쇠구슬 속력</label>
+                <select id="speedSelect">
+                  <option value="0.1">0.1 m/s</option>
+                  <option value="0.2">0.2 m/s</option>
+                  <option value="0.3">0.3 m/s</option>
+                  <option value="0.4" selected>0.4 m/s</option>
+                  <option value="0.5">0.5 m/s</option>
+                  <option value="0.6">0.6 m/s</option>
+                  <option value="0.7">0.7 m/s</option>
+                  <option value="0.8">0.8 m/s</option>
+                  <option value="0.9">0.9 m/s</option>
+                  <option value="1.0">1.0 m/s</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="btn-row">
+              <button class="start" id="runBtn">실험 시작</button>
+              <button class="save" id="saveBtn">기록 저장</button>
+              <button class="reset" id="resetBtn">초기화</button>
+            </div>
+            <div class="hint">질량 변화 실험은 속력이 고정되고, 속력 변화 실험은 질량이 고정됩니다.</div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <span>③ 실험 결과 기록</span>
+            <span class="pill" id="modePill">질량 변화</span>
+          </div>
+          <div class="card-body">
+            <div class="summary">
+              <div class="summary-box"><small>현재 질량</small><strong id="massNow">0.10 kg</strong></div>
+              <div class="summary-box"><small>현재 속력</small><strong id="speedNow">0.4 m/s</strong></div>
+              <div class="summary-box"><small>이동 거리</small><strong id="distanceNow">4.0 cm</strong></div>
+            </div>
+            <div style="overflow-x:auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>실험</th>
+                    <th>질량(kg)</th>
+                    <th>속력(m/s)</th>
+                    <th>속력²</th>
+                    <th>이동 거리(cm)</th>
+                  </tr>
+                </thead>
+                <tbody id="resultBody">
+                  <tr><td colspan="5" class="empty">아직 실험 결과가 없습니다.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <section class="card">
+      <div class="card-header">
+        <span>④ 실험 그래프</span>
+        <span class="pill">질량 따로 · 속력 따로</span>
+      </div>
+      <div class="card-body">
+        <div class="graph-layout">
+          <div>
+            <div style="font-weight:900;color:var(--pink-dark);margin:0 0 8px 4px;">실험 1 그래프 : 질량과 나무 도막 이동 거리</div>
+            <canvas id="massGraph" width="560" height="310"></canvas>
+          </div>
+          <div>
+            <div style="font-weight:900;color:var(--pink-dark);margin:0 0 8px 4px;">실험 2 그래프 : 속력²과 나무 도막 이동 거리</div>
+            <canvas id="speedGraph" width="560" height="310"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const massTab = document.getElementById('massTab');
+    const speedTab = document.getElementById('speedTab');
+    const descBox = document.getElementById('descBox');
+    const modePill = document.getElementById('modePill');
+
+    const massSelect = document.getElementById('massSelect');
+    const speedSelect = document.getElementById('speedSelect');
+    const massNow = document.getElementById('massNow');
+    const speedNow = document.getElementById('speedNow');
+    const distanceNow = document.getElementById('distanceNow');
+
+    const ball = document.getElementById('ball');
+    const block = document.getElementById('block');
+    const arrow = document.getElementById('distanceArrow');
+    const label = document.getElementById('distanceLabel');
+    const resultBody = document.getElementById('resultBody');
+    const massGraph = document.getElementById('massGraph');
+    const speedGraph = document.getElementById('speedGraph');
+
+    let mode = 'mass';
+    let results = [];
+
+    function getMass(){ return Number(massSelect.value); }
+    function getSpeed(){ return Number(speedSelect.value); }
+    function calcDistance(m,v){
+      // 나무 도막 이동 거리: 질량에 비례, 속력의 제곱에 비례하도록 설정
+      // 질량 변화 실험: 속력 0.4 m/s 고정 → 이동 거리 ∝ 질량
+      // 속력 변화 실험: 질량 0.10 kg 고정 → 이동 거리 ∝ 속력²
+      return 250 * m * v * v;
+    }
+
+    function setMode(next){
+      mode = next;
+      const isMass = mode === 'mass';
+      massTab.classList.toggle('active', isMass);
+      speedTab.classList.toggle('active', !isMass);
+      modePill.textContent = isMass ? '질량 변화' : '속력 변화';
+      descBox.textContent = isMass
+        ? '실험 1은 속력을 0.4 m/s로 일정하게 하고, 쇠구슬의 질량에 따라 나무 도막의 이동 거리를 비교합니다.'
+        : '실험 2는 질량을 0.10 kg으로 일정하게 하고, 쇠구슬의 속력에 따라 나무 도막의 이동 거리를 비교합니다.';
+
+      if(isMass){
+        speedSelect.value = '0.4';
+        speedSelect.disabled = true;
+        massSelect.disabled = false;
+      }else{
+        massSelect.value = '0.10';
+        massSelect.disabled = true;
+        speedSelect.disabled = false;
+      }
+      resetAnimation();
+      updateSummary();
+    }
+
+    function updateSummary(){
+      const m = getMass();
+      const v = getSpeed();
+      const d = calcDistance(m,v);
+      massNow.textContent = `${m.toFixed(2)} kg`;
+      speedNow.textContent = `${v.toFixed(1)} m/s`;
+      distanceNow.textContent = `${d.toFixed(1)} cm`;
+      ball.textContent = m.toFixed(2);
+      const size = 24 + ((m - 0.02) / 0.28) * 18;
+      ball.style.width = `${size}px`;
+      ball.style.height = `${size}px`;
+    }
+
+    function resetAnimation(){
+      ball.getAnimations().forEach(a => a.cancel());
+      ball.style.transform = 'translate(0,0) rotate(0deg)';
+      block.style.transition = 'none';
+      block.style.transform = 'translateX(0)';
+      arrow.style.opacity = 0;
+      arrow.style.width = '0px';
+      label.style.opacity = 0;
+    }
+
+    function runExperiment(save=true){
+      const m = getMass();
+      const v = getSpeed();
+      const d = calcDistance(m,v);
+      const visual = Math.min(d * 7.2, window.innerWidth <= 620 ? 115 : 230);
+
+      resetAnimation();
+
+      const mobile = window.innerWidth <= 620;
+      const path = mobile
+        ? [
+          {transform:'translate(0,0) rotate(0deg)'},
+          {transform:'translate(92px,24px) rotate(210deg)'},
+          {transform:'translate(200px,87px) rotate(520deg)'},
+          {transform:'translate(258px,87px) rotate(700deg)'}
+        ]
+        : [
+          {transform:'translate(0,0) rotate(0deg)'},
+          {transform:'translate(145px,31px) rotate(250deg)'},
+          {transform:'translate(300px,88px) rotate(570deg)'},
+          {transform:'translate(372px,88px) rotate(740deg)'}
+        ];
+
+      ball.animate(path,{
+        duration:Math.max(650,1500 - v*850),
+        easing:'ease-in',
+        fill:'forwards'
+      });
+
+      setTimeout(() => {
+        block.style.transition = 'transform .65s ease-out';
+        block.style.transform = `translateX(${visual}px)`;
+        arrow.style.opacity = 1;
+        arrow.style.width = `${visual}px`;
+        label.style.opacity = 1;
+        label.textContent = `${d.toFixed(1)} cm`;
+      }, Math.max(520, 1120 - v*620));
+
+      if(save){ saveResult(); }
+    }
+
+    function saveResult(){
+      const m = getMass();
+      const v = getSpeed();
+      const d = calcDistance(m,v);
+      results.push({mode, mass:m, speed:v, speed2:v*v, distance:d});
+      renderTable();
+      drawGraphs();
+    }
+
+    function renderTable(){
+      if(results.length === 0){
+        resultBody.innerHTML = '<tr><td colspan="5" class="empty">아직 실험 결과가 없습니다.</td></tr>';
+        return;
+      }
+      resultBody.innerHTML = results.map((r,i)=>`
+        <tr>
+          <td>${r.mode === 'mass' ? '질량 변화' : '속력 변화'}</td>
+          <td>${r.mass.toFixed(2)}</td>
+          <td>${r.speed.toFixed(1)}</td>
+          <td>${r.speed2.toFixed(2)}</td>
+          <td>${r.distance.toFixed(1)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function drawAxis(canvas, xLabel){
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+      const pad = {left:56,right:22,top:24,bottom:48};
+      ctx.clearRect(0,0,w,h);
+      ctx.fillStyle = '#fffdfd';
+      ctx.fillRect(0,0,w,h);
+      ctx.strokeStyle = '#f2dce3';
+      ctx.lineWidth = 1;
+      for(let i=0;i<=5;i++){
+        const y = pad.top + (h-pad.top-pad.bottom)*i/5;
+        ctx.beginPath(); ctx.moveTo(pad.left,y); ctx.lineTo(w-pad.right,y); ctx.stroke();
+      }
+      ctx.strokeStyle = '#b4677f';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(pad.left,pad.top);
+      ctx.lineTo(pad.left,h-pad.bottom);
+      ctx.lineTo(w-pad.right,h-pad.bottom);
+      ctx.stroke();
+      ctx.fillStyle = '#8a6872';
+      ctx.font = 'bold 12px Pretendard, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(xLabel,(pad.left+w-pad.right)/2,h-14);
+      ctx.save();
+      ctx.translate(16,(pad.top+h-pad.bottom)/2);
+      ctx.rotate(-Math.PI/2);
+      ctx.fillText('나무 도막 이동 거리(cm)',0,0);
+      ctx.restore();
+      return {ctx,w,h,pad};
+    }
+
+    function drawScatter(canvas, data, xKey, xMax, xLabel){
+      const {ctx,w,h,pad} = drawAxis(canvas,xLabel);
+      const yMax = 32;
+      const sx = x => pad.left + (x/xMax)*(w-pad.left-pad.right);
+      const sy = y => h-pad.bottom - (y/yMax)*(h-pad.top-pad.bottom);
+
+      ctx.fillStyle = '#9b7b84';
+      ctx.font = '11px Pretendard, sans-serif';
+      ctx.textAlign = 'right';
+      for(let i=0;i<=4;i++){
+        const val = yMax*i/4;
+        ctx.fillText(val.toFixed(0),pad.left-8,sy(val)+4);
+      }
+      ctx.textAlign = 'center';
+      for(let i=0;i<=4;i++){
+        const val = xMax*i/4;
+        ctx.fillText(val.toFixed(xMax<1?2:1),sx(val),h-pad.bottom+18);
+      }
+
+      if(data.length === 0){
+        ctx.fillStyle = '#9b7b84';
+        ctx.font = 'bold 14px Pretendard, sans-serif';
+        ctx.fillText('실험 결과가 기록되면 그래프가 그려집니다.',w/2,h/2);
+        return;
+      }
+
+      const sorted = [...data].sort((a,b)=>a[xKey]-b[xKey]);
+      ctx.strokeStyle = '#e98aa6';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      sorted.forEach((d,i)=>{
+        const x=sx(d[xKey]); const y=sy(d.distance);
+        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      });
+      ctx.stroke();
+
+      sorted.forEach(d=>{
+        ctx.beginPath();
+        ctx.arc(sx(d[xKey]),sy(d.distance),6,0,Math.PI*2);
+        ctx.fillStyle = '#c85f7d';
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      });
+    }
+
+    function drawGraphs(){
+      drawScatter(massGraph, results.filter(r=>r.mode==='mass'), 'mass', 0.30, '쇠구슬 질량(kg)');
+      drawScatter(speedGraph, results.filter(r=>r.mode==='speed'), 'speed2', 1.00, '쇠구슬 속력²(m²/s²)');
+    }
+
+    function resetAll(){
+      results = [];
+      resetAnimation();
+      renderTable();
+      drawGraphs();
+      updateSummary();
+    }
+
+    massTab.addEventListener('click',()=>setMode('mass'));
+    speedTab.addEventListener('click',()=>setMode('speed'));
+    massSelect.addEventListener('change',()=>{resetAnimation();updateSummary();});
+    speedSelect.addEventListener('change',()=>{resetAnimation();updateSummary();});
+    document.getElementById('runBtn').addEventListener('click',()=>runExperiment(true));
+    document.getElementById('saveBtn').addEventListener('click',saveResult);
+    document.getElementById('resetBtn').addEventListener('click',resetAll);
+    window.addEventListener('resize',()=>{resetAnimation();drawGraphs();});
+
+    setMode('mass');
+    updateSummary();
+    drawGraphs();
+  </script>
+</body>
+</html>
