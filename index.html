@@ -8,6 +8,70 @@
 :root{--p:#e64d7a;--pd:#b9365d;--ps:#ffe5ee;--bd:#f2c4d1;--tx:#392730;--mut:#806a73;--b:#208bc7;--g:#229954;--sh:0 14px 28px rgba(180,70,105,.14)}
 *{box-sizing:border-box} body{margin:0;font-family:Pretendard,"Noto Sans KR",system-ui,sans-serif;background:linear-gradient(#fff8fb,#fff0f5);color:var(--tx)}
 .app{width:min(1440px,96vw);margin:14px auto 24px}.top{background:#ffffffd8;border:1px solid var(--bd);border-radius:22px;text-align:center;padding:18px;box-shadow:var(--sh);margin-bottom:12px}.top h1{margin:0 0 6px;color:var(--pd);font-size:clamp(2.1rem,4vw,3.8rem);letter-spacing:-.06em}.top p{margin:0;color:var(--mut);font-weight:850}.grid{display:grid;grid-template-columns:1.42fr 1fr;gap:12px;align-items:stretch}.stack{display:grid;gap:12px}.card{background:#fffafb;border:1px solid var(--bd);border-radius:22px;box-shadow:var(--sh);overflow:hidden}.head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--ps);border-bottom:1px solid var(--bd);color:var(--pd);font-weight:950}.hleft{display:flex;align-items:center;gap:9px}.num{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--p);color:white}.pill{background:white;border:1px solid var(--bd);border-radius:999px;padding:6px 12px;font-size:.82rem}.body{padding:14px}.stage{height:520px;border:1px solid #f1ccd7;border-radius:18px;overflow:hidden;background:#f7fbff}svg{width:100%;height:100%;display:block}.tabs,.btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}button{font-family:inherit;cursor:pointer;border:0}.tab{border:1px solid var(--bd);background:white;border-radius:10px;padding:14px 8px;font-weight:950;font-size:1rem}.tab.active{background:linear-gradient(var(--p),#d93c6b);color:white}.desc{background:#fff6f9;border:1px solid #f4d7df;border-radius:12px;padding:12px 14px;margin-bottom:12px;font-weight:850;line-height:1.48}.controls{display:grid;grid-template-columns:1fr 1fr;border:1px solid #f0d3dc;border-radius:12px;overflow:hidden;margin-bottom:12px;background:white}.control{padding:13px;text-align:center;border-right:1px solid #f0d3dc}.control:last-child{border-right:0}.control label{display:block;margin-bottom:8px;font-weight:950;font-size:.86rem}select{width:100%;min-height:42px;border:1px solid #e9cbd5;border-radius:8px;text-align:center;font-weight:900;padding:8px}select:disabled{background:#f5ecf0;color:#ad9aa2}.act{border:1px solid var(--bd);border-radius:10px;padding:13px 10px;font-weight:950;font-size:1rem}.start{background:linear-gradient(var(--p),#d93c6b);color:white}.reset{background:white}.note{margin-top:10px;color:var(--mut);font-weight:800;font-size:.86rem;line-height:1.45}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}.sbox{background:white;border:1px solid #f0d3dc;border-radius:11px;text-align:center;padding:12px 8px}.sbox small{display:block;margin-bottom:6px;font-weight:950;color:#5c4a51;font-size:.78rem}.sbox strong{font-size:1.15rem;font-weight:950}.sbox:nth-child(1) strong{color:var(--pd)}.sbox:nth-child(2) strong{color:#276fd0}.sbox:nth-child(3) strong{color:var(--g)}.tw{overflow-x:auto;border-radius:12px}table{width:100%;border-collapse:collapse;background:white;font-size:.84rem}th,td{border:1px solid #efd2dc;padding:8px 7px;text-align:center;white-space:nowrap}th{background:#fde7ed;color:#5b3340}.blank{color:#c5a6b0;font-weight:900}.current{background:#fff7dc}.complete{color:var(--g);font-weight:950}.graph{margin-top:12px}.ggrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.gtitle{width:fit-content;margin:0 auto 8px;padding:8px 22px;background:#ffeef3;border:1px solid var(--bd);border-radius:10px;color:var(--pd);font-weight:950}canvas{width:100%;height:280px;background:white;border:1px solid #f0d3dc;border-radius:12px}@media(max-width:1100px){.grid{grid-template-columns:1fr}.stage{height:460px}}@media(max-width:760px){.controls,.summary,.btns,.ggrid{grid-template-columns:1fr}.control{border-right:0;border-bottom:1px solid #f0d3dc}.stage{height:360px}}
+
+/* 모바일 화면 최적화 */
+@media(max-width:760px){
+  .topbar{padding:12px 12px;margin-bottom:8px;border-radius:16px}
+  .topbar h1{font-size:1.75rem;margin-bottom:3px}
+  .topbar p{font-size:.82rem;line-height:1.35}
+
+  .app{width:100vw;margin:0 auto 14px;padding:6px}
+  .main-grid{gap:8px}
+  .right-stack{gap:8px}
+  .card{border-radius:16px}
+  .card-header{padding:9px 11px}
+  .num{width:25px;height:25px;font-size:.86rem}
+  .pill{font-size:.72rem;padding:4px 8px}
+  .card-body{padding:9px}
+
+  /* 가상실험 장치의 불필요한 세로 여백 축소 */
+  .stage-wrap{
+    flex:unset;
+    min-height:0 !important;
+    height:auto !important;
+    aspect-ratio:900/520;
+    border-radius:14px;
+  }
+  .stage-wrap svg{
+    width:100%;
+    height:100%;
+  }
+
+  .tabs{gap:6px;margin-bottom:8px}
+  .tab{padding:10px 4px;font-size:.86rem;border-radius:8px}
+  .desc{padding:9px 10px;margin-bottom:8px;font-size:.82rem;line-height:1.4}
+
+  .control-row{grid-template-columns:1fr 1fr;margin-bottom:8px}
+  .control{padding:8px 7px;border-bottom:0}
+  .control label{font-size:.75rem;margin-bottom:5px}
+  select{min-height:35px;font-size:.82rem;padding:5px}
+
+  .btn-row{grid-template-columns:1fr 1fr;gap:6px}
+  .action{padding:10px 4px;font-size:.86rem;border-radius:8px}
+  .note{font-size:.76rem;line-height:1.35;margin-top:7px}
+
+  .summary{grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px}
+  .summary-box{padding:8px 3px;border-radius:8px}
+  .summary-box small{font-size:.66rem;margin-bottom:4px;line-height:1.15}
+  .summary-box strong{font-size:.94rem}
+
+  /* 실험 결과 표가 한 화면에 들어오도록 압축 */
+  .table-wrap{overflow-x:visible}
+  table{font-size:.66rem;table-layout:fixed;width:100%}
+  th,td{padding:5px 2px;white-space:normal;word-break:keep-all;line-height:1.25}
+  th:nth-child(1),td:nth-child(1){width:15%}
+  th:nth-child(2),td:nth-child(2){width:21%}
+  th:nth-child(3),td:nth-child(3),
+  th:nth-child(4),td:nth-child(4),
+  th:nth-child(5),td:nth-child(5){width:14%}
+  th:nth-child(6),td:nth-child(6){width:16%}
+
+  .graph-card{margin-top:8px}
+  .graph-layout{grid-template-columns:1fr;gap:10px}
+  .graph-title{font-size:.82rem;padding:6px 14px;margin-bottom:6px}
+  canvas{height:220px}
+}
+
 </style>
 </head>
 <body>
@@ -29,7 +93,7 @@
 <g id="ball" transform="translate(70 226)"><ellipse cx="0" cy="22" rx="22" ry="7" fill="rgba(0,0,0,.16)"/><circle id="ballCircle" r="20" fill="url(#ballg)" filter="url(#ssh)"/><text id="ballText" y="5" text-anchor="middle" font-size="11" font-weight="950" fill="#fff">0.05</text></g>
 </svg></div></div></section>
 <div class="stack"><section class="card"><div class="head"><div class="hleft"><span class="num">2</span><span>실험 조건 설정</span></div></div><div class="body"><div class="tabs"><button class="tab active" id="massTab">실험 1 : 질량 변화</button><button class="tab" id="speedTab">실험 2 : 속력 변화</button></div><div class="desc" id="desc">실험 1은 쇠구슬의 속력을 0.4 m/s로 일정하게 두고, 질량에 따른 나무 도막의 이동 거리를 비교합니다.</div><div class="controls"><div class="control"><label>쇠구슬 질량(kg)</label><select id="massSel"></select></div><div class="control"><label>쇠구슬 속력(m/s)</label><select id="speedSel"></select></div></div><div class="btns"><button class="act start" id="run">▷ 실험 시작 및 기록</button><button class="act reset" id="reset">⟳ 기록 초기화</button></div><div class="note">쇠구슬이 경사면을 따라 내려와 나무도막에 닿은 뒤, 나무도막이 오른쪽으로 이동합니다.</div></div></section>
-<section class="card"><div class="head"><div class="hleft"><span class="num">3</span><span>실험 결과 기록</span></div></div><div class="body"><div class="summary"><div class="sbox"><small>현재 질량(kg)</small><strong id="massNow">0.05</strong></div><div class="sbox"><small>현재 속력(m/s)</small><strong id="speedNow">0.40</strong></div><div class="sbox"><small>이동 거리(cm)</small><strong id="distNow">2.0</strong></div></div><div class="tw"><table><thead><tr><th>실험</th><th>조건</th><th>1회(cm)</th><th>2회(cm)</th><th>3회(cm)</th><th>평균(cm)</th></tr></thead><tbody id="tbody"></tbody></table></div></div></section></div></main>
+<section class="card"><div class="head"><div class="hleft"><span class="num">3</span><span>실험 결과 기록</span></div></div><div class="body"><div class="summary"><div class="sbox"><small>현재 질량(kg)</small><strong id="massNow">0.05</strong></div><div class="sbox"><small>현재 속력(m/s)</small><strong id="speedNow">0.40</strong></div><div class="sbox"><small>이동 거리(cm)</small><strong id="distNow">2.0</strong></div></div><div class="tw"><table><thead><tr><th>실험</th><th>조건</th><th>1회<br>(cm)</th><th>2회<br>(cm)</th><th>3회<br>(cm)</th><th>평균<br>(cm)</th></tr></thead><tbody id="tbody"></tbody></table></div></div></section></div></main>
 <section class="card graph"><div class="head"><div class="hleft"><span class="num">4</span><span>실험 결과 그래프</span></div><span class="pill">기록된 결과만 표시</span></div><div class="body"><div class="ggrid"><div><div class="gtitle">질량과 나무 도막 이동 거리</div><canvas id="g1" width="650" height="320"></canvas></div><div><div class="gtitle">속력²과 나무 도막 이동 거리</div><canvas id="g2" width="650" height="320"></canvas></div></div></div></section></div>
 <script>
 const massData=[.05,.10,.15,.20,.25,.30,.35,.40,.45,.50].map(m=>({mass:m,distance:m/.05*2}));
