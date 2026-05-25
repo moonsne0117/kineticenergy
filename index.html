@@ -63,12 +63,25 @@
       display:grid;
       grid-template-columns:1.42fr 1fr;
       gap:12px;
-      align-items:start;
+      align-items:stretch;
+    }
+
+    .main-grid > .card{
+      height:100%;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .main-grid > .card > .card-body{
+      flex:1;
+      display:flex;
+      flex-direction:column;
     }
 
     .right-stack{
       display:grid;
       gap:12px;
+      height:100%;
     }
 
     .card{
@@ -123,7 +136,9 @@
 
     .sim-stage{
       position:relative;
-      height:465px;
+      flex:1;
+      min-height:430px;
+      height:auto;
       border:1px solid var(--line2);
       border-radius:18px;
       overflow:hidden;
@@ -201,7 +216,7 @@
     .ball{
       position:absolute;
       left:88px;
-      top:153px;
+      top:158px;
       width:45px;
       height:45px;
       border-radius:50%;
@@ -219,7 +234,7 @@
     .ghost-ball{
       position:absolute;
       left:62px;
-      top:162px;
+      top:166px;
       width:58px;
       height:22px;
       border-radius:999px;
@@ -273,7 +288,7 @@
     .block{
       position:absolute;
       left:620px;
-      top:302px;
+      top:236px;
       width:112px;
       height:62px;
       border-radius:5px;
@@ -295,10 +310,17 @@
     .block::before{top:17px;background:rgba(255,255,255,.24);}
     .block::after{bottom:16px;background:rgba(0,0,0,.13);}
 
+    .block.moving-shadow{
+      box-shadow:
+        -18px 0 0 rgba(183,115,52,.18),
+        -34px 0 0 rgba(183,115,52,.10),
+        0 8px 14px rgba(0,0,0,.22);
+    }
+
     .impact{
       position:absolute;
       left:590px;
-      top:284px;
+      top:218px;
       width:74px;
       height:74px;
       opacity:0;
@@ -332,7 +354,7 @@
     .speed-lines{
       position:absolute;
       left:708px;
-      top:309px;
+      top:243px;
       width:170px;
       height:48px;
       opacity:0;
@@ -355,7 +377,7 @@
     .motion-arrow{
       position:absolute;
       left:748px;
-      top:334px;
+      top:268px;
       width:100px;
       height:8px;
       background:#ffbf24;
@@ -390,7 +412,7 @@
       left:620px;
       top:402px;
       width:0;
-      border-top:4px solid #2b94d1;
+      border-top:5px solid #2b94d1;
       z-index:20;
       opacity:0;
       transition:width .65s ease,opacity .2s ease;
@@ -412,10 +434,10 @@
       left:650px;
       top:421px;
       background:#fff;
-      border:1px solid #e8d5bd;
-      color:#333;
+      border:2px solid #8cc8ef;
+      color:#1f5f91;
       border-radius:8px;
-      padding:7px 15px;
+      padding:8px 16px;
       font-weight:950;
       z-index:21;
       opacity:0;
@@ -683,11 +705,11 @@
       .gate{left:42%;top:220px;width:62px;height:82px;border-width:6px;}
       .gate::before{font-size:.72rem;top:-30px;}
       .gate-display{width:56px;font-size:.72rem;}
-      .ball{width:34px;height:34px;left:70px;top:150px;}
-      .block{left:56%;top:278px;width:78px;height:45px;}
-      .impact{left:51%;top:250px;}
-      .speed-lines{left:63%;top:286px;width:110px;}
-      .motion-arrow{left:68%;top:306px;width:62px;}
+      .ball{width:34px;height:34px;left:70px;top:154px;}
+      .block{left:56%;top:230px;width:78px;height:45px;}
+      .impact{left:51%;top:202px;}
+      .speed-lines{left:63%;top:238px;width:110px;}
+      .motion-arrow{left:68%;top:258px;width:62px;}
       .distance-line{left:56%;top:354px;}
       .marker{top:322px;height:44px;}
       .marker.start{left:56%;}
@@ -716,7 +738,7 @@
           <span class="pill">실험 결과 자동 기록</span>
         </div>
         <div class="card-body">
-          <div class="sim-stage">
+          <div class="sim-stage" id="stage">
             <div class="window"></div>
             <div class="speech">쇠구슬이 경사면을 내려와<br>나무 도막을 밀어 이동시킵니다.</div>
 
@@ -737,6 +759,9 @@
                     fill="none" stroke="rgba(255,255,255,.32)" stroke-width="5" stroke-linecap="round"/>
               <path d="M -15 208 C 78 213, 132 205, 190 238 C 255 275, 284 336, 392 341 C 495 346, 650 340, 920 340"
                     fill="none" stroke="rgba(86,47,20,.25)" stroke-width="5" stroke-linecap="round"/>
+              <path id="ballGuidePath"
+                    d="M -15 160 C 78 165, 132 157, 190 190 C 255 227, 284 288, 392 293 C 495 298, 650 292, 920 292"
+                    fill="none" stroke="none"/>
             </svg>
 
             <div class="ghost-ball" id="ghostBall"></div>
@@ -883,6 +908,8 @@
     const massNow = $('massNow');
     const speedNow = $('speedNow');
     const distanceNow = $('distanceNow');
+    const stage = $('stage');
+    const ballGuidePath = $('ballGuidePath');
     const ball = $('ball');
     const ghostBall = $('ghostBall');
     const block = $('block');
@@ -898,6 +925,7 @@
 
     let mode = 'mass';
     let records = {};
+    let ballRaf = null;
 
     function initSelects(){
       massSelect.innerHTML = hiddenMassData.map(d => `<option value="${d.mass.toFixed(2)}">${d.mass.toFixed(2)}</option>`).join('');
@@ -959,6 +987,80 @@
       resetScene(true);
     }
 
+    function easeInOutCubic(t){
+      return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
+    }
+
+    function svgToStage(x, y){
+      const rect = stage.getBoundingClientRect();
+      return {
+        x: x * (rect.width / 900),
+        y: y * (rect.height / 470)
+      };
+    }
+
+    function setBallCenter(x, y, rotation = 0){
+      ball.style.left = `${x}px`;
+      ball.style.top = `${y}px`;
+      ball.style.transform = `translate(-50%,-50%) rotate(${rotation}deg)`;
+    }
+
+    function getBallStartPoint(){
+      return svgToStage(72, 168);
+    }
+
+    function getCollisionPoint(){
+      const radius = ball.offsetWidth / 2;
+      return {
+        x: block.offsetLeft - radius + 1,
+        y: block.offsetTop + block.offsetHeight / 2
+      };
+    }
+
+    function getBallPathPoints(){
+      const collision = getCollisionPoint();
+      const p0 = getBallStartPoint();
+
+      return [
+        p0,
+        svgToStage(130, 170),
+        svgToStage(190, 195),
+        svgToStage(250, 235),
+        svgToStage(315, 278),
+        svgToStage(390, 300),
+        {
+          x: svgToStage(470, 292).x,
+          y: collision.y
+        },
+        {
+          x: (svgToStage(540, 292).x + collision.x) / 2,
+          y: collision.y
+        },
+        collision
+      ];
+    }
+
+    function interpolatePath(points, t){
+      const n = points.length - 1;
+      const scaled = Math.min(n - 0.0001, Math.max(0, t * n));
+      const i = Math.floor(scaled);
+      const local = scaled - i;
+      const a = points[i];
+      const b = points[i + 1];
+      return {
+        x: a.x + (b.x - a.x) * local,
+        y: a.y + (b.y - a.y) * local
+      };
+    }
+
+    function setBallAtStart(){
+      const p = getBallStartPoint();
+      setBallCenter(p.x, p.y, 0);
+      ghostBall.style.left = `${p.x - 28}px`;
+      ghostBall.style.top = `${p.y + 8}px`;
+      ghostBall.style.opacity = '.65';
+    }
+
     function updateSummary(){
       const c = getCurrentCondition();
       massNow.textContent = c.mass.toFixed(2);
@@ -973,9 +1075,12 @@
         : 38;
       ball.style.width = `${size}px`;
       ball.style.height = `${size}px`;
+      setBallAtStart();
     }
 
     function resetScene(showDefault=true){
+      if(ballRaf) cancelAnimationFrame(ballRaf);
+      ballRaf = null;
       ball.getAnimations().forEach(a=>a.cancel());
       block.getAnimations().forEach(a=>a.cancel());
 
@@ -985,7 +1090,8 @@
       });
 
       block.classList.remove('shake');
-      ball.style.transform = 'translate(0,0) rotate(0deg)';
+      block.classList.remove('moving-shadow');
+      setBallAtStart();
       ghostBall.style.opacity = '.65';
       block.style.transition = 'none';
       block.style.setProperty('--move','0px');
@@ -1006,7 +1112,21 @@
     }
 
     function visualDistance(distance){
-      return Math.min(260, Math.max(55, distance * 1.25));
+      // 실제 실험 결과값은 그대로 두고, 화면에서 보이는 이동 거리만 크게 보정합니다.
+      // 질량 변화는 2.0~20.0 cm 범위라 그대로 표시하면 차이가 작게 보여,
+      // 화면 이동 거리는 50~280 px로 확대해 학생들이 차이를 눈으로 확인할 수 있게 합니다.
+      if(mode === 'mass'){
+        const minD = 2;
+        const maxD = 20;
+        const ratio = (distance - minD) / (maxD - minD);
+        return 50 + Math.max(0, Math.min(1, ratio)) * 230;
+      }
+
+      // 속력 변화는 2.0~200.0 cm 범위라 너무 멀리 나가지 않도록 화면 안에서 압축해 표시합니다.
+      const minD = 2;
+      const maxD = 200;
+      const ratio = (distance - minD) / (maxD - minD);
+      return 50 + Math.max(0, Math.min(1, ratio)) * 230;
     }
 
     function runExperiment(){
@@ -1027,58 +1147,70 @@
       resetScene(false);
 
       const visual = visualDistance(c.distance);
-      const duration = Math.max(720, 1550 - c.speed * 260);
-      const mobile = window.innerWidth < 760;
-
-      const path = mobile
-        ? [
-            {transform:'translate(0,0) rotate(0deg)'},
-            {transform:'translate(82px,42px) rotate(260deg)'},
-            {transform:'translate(188px,116px) rotate(560deg)'},
-            {transform:'translate(252px,124px) rotate(760deg)'}
-          ]
-        : [
-            {transform:'translate(0,0) rotate(0deg)'},
-            {transform:'translate(154px,55px) rotate(280deg)'},
-            {transform:'translate(340px,137px) rotate(600deg)'},
-            {transform:'translate(480px,149px) rotate(840deg)'}
-          ];
-
-      ball.animate(path,{duration,easing:'cubic-bezier(.36,.03,.22,1)',fill:'forwards'});
+      const duration = Math.max(850, 1750 - c.speed * 240);
+      const pathPoints = getBallPathPoints();
+      const spinTurns = 980;
 
       ghostBall.animate([
-        {opacity:.65, transform:'translateX(0) rotate(16deg)'},
-        {opacity:.2, transform:'translateX(210px) rotate(8deg)'},
-        {opacity:0, transform:'translateX(430px) rotate(0deg)'}
-      ],{duration:duration*.9,easing:'ease-out',fill:'forwards'});
+        {opacity:.65, transform:'rotate(16deg)'},
+        {opacity:.15, transform:'translateX(90px) rotate(8deg)'},
+        {opacity:0, transform:'translateX(180px) rotate(0deg)'}
+      ],{duration:duration*.72,easing:'ease-out',fill:'forwards'});
 
-      setTimeout(()=>{
-        impact.classList.remove('show-impact');
-        void impact.offsetWidth;
-        impact.classList.add('show-impact');
+      let startTime = null;
 
-        speedLines.classList.remove('show-speed');
-        motionArrow.classList.remove('show-speed');
-        void speedLines.offsetWidth;
-        speedLines.classList.add('show-speed');
-        motionArrow.classList.add('show-speed');
+      function step(ts){
+        if(!startTime) startTime = ts;
+        const raw = Math.min(1, (ts - startTime) / duration);
+        const eased = easeInOutCubic(raw);
+        const p = interpolatePath(pathPoints, eased);
+        setBallCenter(p.x, p.y, eased * spinTurns);
 
-        block.style.transition = 'transform .85s cubic-bezier(.12,.78,.18,1)';
-        block.style.setProperty('--move', `${visual}px`);
-        block.style.transform = `translateX(${visual}px)`;
-        block.classList.add('shake');
+        if(raw < 1){
+          ballRaf = requestAnimationFrame(step);
+          return;
+        }
 
-        distanceLine.style.opacity = 1;
-        distanceLine.style.width = `${visual}px`;
-        distanceLabel.style.opacity = 1;
-        distanceLabel.textContent = `이동 거리: ${c.distance.toFixed(1)} cm`;
-        endMarker.style.left = `${620 + visual}px`;
+        ballRaf = null;
 
-        rec.trials[emptyIndex] = c.distance;
-        records[c.key] = rec;
-        renderRecords();
-        drawGraphs();
-      }, duration - 120);
+        const contact = getCollisionPoint();
+        setBallCenter(contact.x, contact.y, spinTurns);
+
+        setTimeout(()=>{
+          impact.classList.remove('show-impact');
+          void impact.offsetWidth;
+          impact.classList.add('show-impact');
+
+          speedLines.classList.remove('show-speed');
+          motionArrow.classList.remove('show-speed');
+          void speedLines.offsetWidth;
+          speedLines.classList.add('show-speed');
+          motionArrow.classList.add('show-speed');
+
+          block.classList.add('moving-shadow');
+          block.style.transition = 'transform .9s cubic-bezier(.12,.78,.18,1)';
+          block.style.setProperty('--move', `${visual}px`);
+          block.style.transform = `translateX(${visual}px)`;
+          block.classList.add('shake');
+
+          setTimeout(()=>{
+            block.classList.remove('moving-shadow');
+          }, 950);
+
+          distanceLine.style.opacity = 1;
+          distanceLine.style.width = `${visual}px`;
+          distanceLabel.style.opacity = 1;
+          distanceLabel.textContent = `이동 거리: ${c.distance.toFixed(1)} cm`;
+          endMarker.style.left = `${620 + visual}px`;
+
+          rec.trials[emptyIndex] = c.distance;
+          records[c.key] = rec;
+          renderRecords();
+          drawGraphs();
+        }, 120);
+      }
+
+      ballRaf = requestAnimationFrame(step);
     }
 
     function renderRecords(){
